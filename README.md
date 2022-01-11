@@ -1,2 +1,2 @@
-# msc_maths
-My studies of maths at the FU Berlin
+# Discrete Mathematics II
+DMII FU Berlin
