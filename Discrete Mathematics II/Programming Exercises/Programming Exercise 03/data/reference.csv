@@ -1,0 +1,31 @@
+Nutrient;Unit;Min;Max
+Calories;kcal;2000;2100
+Total Fat;g;67;70
+Protein;g;48;50
+Saturated Fat;g;NaN;22
+Monounsaturated Fat;g;22;NaN
+Polyunsaturated Fat;g;22;23
+Carbohydrates;g;250;NaN
+Total Fiber;g;30;NaN
+Vitamin A;IU;2333;2450
+Vitamin D;IU;800;840
+Vitamin E;mg;12;13
+Vitamin K;ug;60;63
+Thiamin;mg;1;1.05
+Riboflavin;mg;1.1;1.16
+Niacin;mg;12;13
+Vitamin B6;mg;1.4;1.47
+Folate;ug;300;315
+Pantothenic Acid;mg;5;5.25
+Vitamin B12;ug;4;4.2
+Vitamin C;mg;95;100
+Sodium;mg;1500;1600
+Potassium;mg;4000;4200
+Calcium;mg;1000;1050
+Phosphorus;mg;700;735
+Magnesium;mg;300;315
+Iron;mg;15;16
+Zinc;mg;7;10
+Selenium;ug;60;63
+Copper;mg;1;1.5
+Manganese;mg;2;5
