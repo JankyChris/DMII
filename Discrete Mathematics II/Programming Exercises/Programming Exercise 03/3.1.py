@@ -10,3 +10,5 @@ model.optimize()
 sol = model.getBestSol()
 print("x: {}".format(sol[x]))
 print("y: {}".format(sol[y]))
+
+print("xyz")
