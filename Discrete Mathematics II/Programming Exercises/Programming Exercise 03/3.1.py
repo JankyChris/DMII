@@ -1,6 +1,6 @@
-from pyscipopt import Model, quicksum, multidict
-import csv
 import os
+import csv
+from pyscipopt import Model, quicksum, multidict
 
 def file_paths():
     """
@@ -30,4 +30,3 @@ def import_csv(allfoods_abs_file_path, reference_abs_file_path):
 if __name__ == "__main__":
     allfoods_abs_file_path, reference_abs_file_path = file_paths()
     allfoods, reference = import_csv(allfoods_abs_file_path, reference_abs_file_path)
-    
