@@ -55,11 +55,13 @@ def create_dataset(foods: pd.DataFrame, reference: pd.DataFrame):
         """
 
         # add rows "Water", "Total Sugar"
-        reference.loc[30] = (["Water", "g", nan, nan])
-        reference.loc[31] = (["Total Sugar", "g", nan, nan])
+        reference.loc[30] = (["Water", "g", np.nan, np.nan])
+        reference.loc[31] = (["Total Sugar", "g", np.nan, np.nan])
 
         # reorder rows to match "allfoods.csv"
         reference = reference.reindex([30, 0, 2, 1, 6, 7, 31, 22, 25, 24, 23, 21, 20, 26, 28, 29, 27, 19, 12, 13, 14, 17, 15, 16, 18, 8, 10, 9, 11, 3, 4, 5]).reset_index()
+
+        # for testing: foods = foods.drop(foods.tail(8750).index)
 
         return foods, reference
 
@@ -95,7 +97,7 @@ def diet_model(F,N,a,b,n):
 
     # define objective vector c for the objective max c^T*x
     def c(j):
-        return (n[i_fiber][j] - n[i_sugar][j])
+        return (n[j][i_fiber] - n[j][i_sugar])
 
     # create variables
     x = {}
@@ -103,16 +105,17 @@ def diet_model(F,N,a,b,n):
         x[j] = model.addVar(vtype="I", name="x(%s)"%j)
 
     # define constraints:
-    for j in range(F):
-        
+    for i in range(N):
         # max amount of nutrient i
-        model.addCons(quicksum(n[j][i]*x[j] for i in range(N)) <= b[j])
+        if not np.isnan(b[i]):
+            model.addCons(quicksum(n[j][i]*x[j] for j in range(F)) <= b[i])
 
         # min amount of nutrient i
-        model.addCons(quicksum(n[j][i]*x[j] for i in range(N)) >= a[j])
+        if not np.isnan(a[i]):
+            model.addCons(quicksum(n[j][i]*x[j] for j in range(F)) >= a[i])
 
     # objective:
-    model.setObjective(quicksum((c[j]*x[j]) for j in range(F)), "maximize")
+    model.setObjective(quicksum((c(j)*x[j]) for j in range(F)), "maximize")
     model.data = x
 
     return model
@@ -125,5 +128,6 @@ if __name__ == "__main__":
     F, N, a, b, n = create_dataset(allfoods, reference)
 
     model = diet_model(F, N, a, b, n)
-    model.hideOutput() # silent mode
+
+    #model.hideOutput() # silent mode
     model.optimize()
