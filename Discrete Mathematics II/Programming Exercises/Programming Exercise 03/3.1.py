@@ -5,7 +5,7 @@ import csv
 import numpy as np
 import pandas as pd
 
-from pyscipopt import Model, quicksum, multidict
+from pyscipopt import Model, quicksum
 
 
 def file_paths():
@@ -55,13 +55,11 @@ def create_dataset(foods: pd.DataFrame, reference: pd.DataFrame):
         """
 
         # add rows "Water", "Total Sugar"
-        reference.loc[30] = (["Water", "g", np.nan, np.nan])
-        reference.loc[31] = (["Total Sugar", "g", np.nan, np.nan])
-
+        reference.loc[30] = (["Water", "g", None, None])
+        reference.loc[31] = (["Total Sugar", "g", None, None])
+        
         # reorder rows to match "allfoods.csv"
         reference = reference.reindex([30, 0, 2, 1, 6, 7, 31, 22, 25, 24, 23, 21, 20, 26, 28, 29, 27, 19, 12, 13, 14, 17, 15, 16, 18, 8, 10, 9, 11, 3, 4, 5]).reset_index()
-
-        # for testing: foods = foods.drop(foods.tail(8750).index)
 
         return foods, reference
 
@@ -74,10 +72,12 @@ def create_dataset(foods: pd.DataFrame, reference: pd.DataFrame):
     b = np.zeros(N)
 
     for i in range(N):
-        a[i] = reference["Max"][i]
-        b[i] = reference["Min"][i]
+        a[i] = reference["Min"][i]
+        b[i] = reference["Max"][i]
 
     n = np.delete(foods.to_numpy(), [0, 1], 1)
+
+    print(b)
 
     return F, N, a, b, n
 
@@ -95,27 +95,25 @@ def diet_model(F,N,a,b,n):
     # define indices for fiber and sugar, respectively
     i_fiber, i_sugar = 5, 6
 
-    # define objective vector c for the objective max c^T*x
-    def c(j):
-        return (n[j][i_fiber] - n[j][i_sugar])
+    # define objective vector c for the objective [ max c^T*x ]
+    sugar, fiber = np.zeros(F), np.zeros(F)
+    for j in range(F):
+        sugar[j] = n[j][i_sugar]
+        fiber[j] = n[j][i_fiber]
 
     # create variables
     x = {}
     for j in range(F):
-        x[j] = model.addVar(vtype="I", name="x(%s)"%j)
+        x[j] = model.addVar(vtype="C", name="x(%s)"%j)
 
     # define constraints:
+    cons = {}
     for i in range(N):
-        # max amount of nutrient i
-        if not np.isnan(b[i]):
-            model.addCons(quicksum(n[j][i]*x[j] for j in range(F)) <= b[i])
-
-        # min amount of nutrient i
-        if not np.isnan(a[i]):
-            model.addCons(quicksum(n[j][i]*x[j] for j in range(F)) >= a[i])
+        cons[i] = model.addCons(quicksum(n[j][i]*x[j] for j in range(F)) <= b[i], name="Nutr(%s)"%i)
+        model.chgLhs(cons[i], a[i])
 
     # objective:
-    model.setObjective(quicksum((c(j)*x[j]) for j in range(F)), "maximize")
+    model.setObjective(quicksum((fiber[j]*x[j] - sugar[j]*x[j]) for j in range(F)), "maximize")
     model.data = x
 
     return model
@@ -131,3 +129,7 @@ if __name__ == "__main__":
 
     #model.hideOutput() # silent mode
     model.optimize()
+
+    #x = model.data
+    #for j in x:
+    #    print(model.getVal(x[j]))
